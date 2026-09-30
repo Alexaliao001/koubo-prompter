@@ -214,7 +214,7 @@ input[type=range]{width:100%;accent-color:var(--accent);height:28px}
     </div>
   </div>
 
-  <p class="note">第一次用会下载约 44MB 的离线语音模型，之后不用再下，建议连 Wi-Fi。在 Safari 里点"分享 → 添加到主屏幕"，以后像 App 一样全屏打开。</p>
+  <p class="note">第一次用：先在 Safari 里点"分享 → 添加到主屏幕"，再从主屏幕图标打开，在能打开这个网页的网络下（国内一般要开代理）等右上角显示"已就绪 · 可断网使用"。约 44MB，只需一次，之后不开代理、断网也能用。</p>
 
   <div class="dock"><button class="start" id="btnGo" type="button">去拍摄</button></div>
 </div>
@@ -389,7 +389,7 @@ function updateStats(){
 const M={state:"idle",model:null,err:"",promise:null};
 function showModel(){
   const el=$("#modelStatus");el.className="model "+(M.state==="idle"?"":M.state);
-  el.lastElementChild.textContent=M.state==="ready"?"离线语音识别已就绪":M.state==="error"?"语音模型没加载成功":M.state==="loading"?"语音模型加载中（首次约 44MB）":"语音跟读未启用";
+  el.lastElementChild.textContent=M.state==="ready"?(window.__swReady?"已就绪 · 可断网使用":"离线语音识别已就绪"):M.state==="error"?"语音模型没加载成功":M.state==="loading"?"语音模型加载中（首次约 44MB）":"语音跟读未启用";
   syncUI();
 }
 function loadModel(){
@@ -892,6 +892,10 @@ window.__tp=()=>({open:R.open,running:R.running,paused:R.paused,finished:R.finis
 
 syncUI();
 if(S.mode==="voice")loadModel();else showModel();
+// 离线缓存：打开过一次之后，没网或打不开 github.io 也能用
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js").then(()=>navigator.serviceWorker.ready).then(()=>{window.__swReady=true;showModel()}).catch(()=>{});
+}
 })();
 </script>
 </body>
