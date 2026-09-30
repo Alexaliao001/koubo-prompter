@@ -398,7 +398,12 @@ function loadModel(){
   M.promise=(async()=>{
     try{
       if(!window.Vosk)throw new Error("no vosk");
-      M.model=await window.Vosk.createModel(MODEL_URL);
+      // 必须传完整网址：识别库在后台线程里解析相对路径时会丢掉子目录
+      const url=new URL(MODEL_URL,location.href).href;
+      M.model=await Promise.race([
+        window.Vosk.createModel(url),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error("加载超时")),240000))
+      ]);
       M.state="ready";
     }catch(e){M.state="error";M.err=String(e&&e.message||e);M.promise=null}
     showModel();
